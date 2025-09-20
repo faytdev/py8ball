@@ -1,32 +1,38 @@
 import os
 import time
 import random
+import platform
+
+
+def clear_screen() -> None:
+    system: str = platform.system()
+    if system == "win32":
+        os.system("cls")
+    else:
+        os.system("clear")
 
 
 def get_answers() -> list[str]:
-    cleaned = []
     with open("answers.txt", "r") as file:
-        for line in file.readlines():
-            cleaned.append(line.replace("\n", ""))
-
-    return cleaned
+        return [line.strip("\n") for line in file]
 
 
-def get_base() -> list[str]:
+def get_ball() -> list[str]:
     with open("circle.txt", "r") as file:
         return file.readlines()
 
 
-def insert_answer(answer: str, ball: list[str]) -> str:
+def insert_answer(answer: str) -> str:
+    ball: list[str] = get_ball()
     ans_padded = f" ,{answer.center(27)}," + "\n"
     ball[5] = ans_padded
     return "".join(ball)
 
 
 def shake(count: int) -> None:
-    ball = "".join(get_base())
+    ball = "".join(get_ball())
     down = False
-    os.system("cls")
+    clear_screen()
     while count > 0:
         count -= 1
         if down:
@@ -34,31 +40,28 @@ def shake(count: int) -> None:
         down = not down
         print(ball)
         time.sleep(0.25)
-        os.system("cls")
+        clear_screen()
 
 
 def main() -> None:
+    clear_screen()
     answers = get_answers()
-    ball = get_base()
 
     while 1:
-        os.system("cls")
-        print("Enter your question: ")
-        question = input()
+        clear_screen()
+        print("Enter your question (q to quit): ")
 
+        question = input()
         if question.lower() == "q":
             break
 
         shake(random.randint(4, 10))
+        answer = answers[random.randint(0, len(answers) - 1)]
+        print(f"{question.upper()}\n{insert_answer(answer)}\n")
 
-        answer = insert_answer(answers[random.randint(0, len(answers) - 1)], ball)
-
-        print(question.upper() + "\n")
-        print(answer)
-        print("\n")
-        print("Press enter to continue.")
-
-        input()
+        keep_going: str = input("Press enter to continue, enter q to quit:")
+        if keep_going.lower() in ("q", "quit"):
+            break
 
 
 if __name__ == "__main__":
